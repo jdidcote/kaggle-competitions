@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="mlutils",
+    name="ml_utils",
     version="0.0.1",
     description="ML utility functions for notebooks",
     packages=setuptools.find_packages(),
