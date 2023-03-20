@@ -43,6 +43,7 @@ MarkupSafe==2.1.2
 matplotlib==3.6.3
 matplotlib-inline==0.1.6
 mistune==2.0.5
+ml-utils==0.0.0
 nbclassic==0.5.3
 nbclient==0.7.2
 nbconvert==7.2.10
@@ -97,3 +98,4 @@ webcolors==1.12
 webencodings==0.5.1
 websocket-client==1.5.1
 widgetsnbextension==4.0.5
+xgboost==1.7.4
