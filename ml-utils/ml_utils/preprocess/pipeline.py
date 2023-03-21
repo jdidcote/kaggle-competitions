@@ -4,7 +4,7 @@ import pandas as pd
 
 def preprocessing_pipeline(
     df: pd.DataFrame, 
-    pipeline: Dict[str, Tuple[Callable, dict]],
+    pipeline: Dict[str, Tuple[Callable[[pd.DataFrame], pd.DataFrame], dict]],
 ) -> pd.DataFrame:
     """Applies all preprocessing steps to df
 
@@ -23,6 +23,7 @@ def preprocessing_pipeline(
         df = func(df, **kwargs)
     
     return df
+
 
 def extract_x_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Series]:
     """Split into X and y for modelling
