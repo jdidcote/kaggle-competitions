@@ -22,7 +22,8 @@ def download_and_unzip(competition: str) -> None:
 
     if _data_already_exists():
         print("Local data already exists. Skipping download.")
-        Path(zip_file_name).unlink()
+        if zip_file_name.exists():
+            Path(zip_file_name).unlink()
         return
 
     subprocess.call([

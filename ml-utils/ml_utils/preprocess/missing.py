@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 def check_missingness(df: pd.DataFrame) -> pd.DataFrame:
     """
     Get the percentage of missing data in each column of a dataframe

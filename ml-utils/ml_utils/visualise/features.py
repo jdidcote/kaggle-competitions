@@ -3,12 +3,14 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 
+
 def feature_correlation_plot(df: pd.DataFrame):
     corr = df.corr()
     mask = np.triu(np.ones_like(corr, dtype=bool))
     sns.heatmap(corr, mask=mask, center=0, linewidths=1, annot=True, fmt=".2f")
     plt.show()
-    
+
+
 def plot_importances(model, features: list, top_n: int, return_df=False):
     importances = pd.DataFrame({
         'Feature': features,
@@ -18,6 +20,7 @@ def plot_importances(model, features: list, top_n: int, return_df=False):
     sns.barplot(x='Importance', y='Feature', data=importances.head(top_n))
     if return_df:
         return importances 
+
 
 def plot_pct_by_group(df: pd.DataFrame, pct_col: str, group_col: str, kind: str="line"):
     group_df = df.groupby(group_col)
