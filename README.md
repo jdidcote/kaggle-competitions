@@ -2,7 +2,7 @@
 
 A repo to store notebooks used for kaggle competitions
 
-```commandline
+```shell
 $ cd <path-to-project>
 $ python3 -m venv venv
 $ source env/bin/activate
