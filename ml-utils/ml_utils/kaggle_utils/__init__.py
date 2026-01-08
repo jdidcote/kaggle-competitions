@@ -1,42 +1,51 @@
-import os
-import shutil
-import subprocess
 from pathlib import Path
+from typing import Callable, Any, Iterable, Union
+from zipfile import ZipFile
+
+import pandas as pd
+from kaggle.api.kaggle_api_extended import KaggleApi
 
 
-def _data_already_exists() -> bool:
-    data_dir = Path("data")
-    try:
-        downloaded_files = os.listdir(data_dir)
-    except FileNotFoundError:
-        return False
-    return len(downloaded_files) > 0
-
-
-def download_and_unzip(competition: str) -> None:
+def download_kaggle_competition_data(
+    competition_name: str, data_dir: Union[Path, str] = "data"
+) -> Path:
     """
-    Downloads and unzips kaggle competition into a 'data' folder in the current directory
+    Download and extract Kaggle competition data into `data_dir`.
+    Returns the directory containing the extracted dataset.
     """
-    zip_file_name = Path(competition + ".zip")
-    data_dir = Path("data")
 
-    if _data_already_exists():
-        print("Local data already exists. Skipping download.")
-        if zip_file_name.exists():
-            Path(zip_file_name).unlink()
-        return
+    if not isinstance(data_dir, Path):
+        data_dir = Path(data_dir)
 
-    subprocess.call([
-        "kaggle",
-        "competitions",
-        "download",
-        "-c",
-        competition
-    ])
+    data_dir.mkdir(parents=True, exist_ok=True)
 
-    if not zip_file_name.exists():
-        raise FileNotFoundError("Kaggle failed to download, check local kaggle.json")
+    api = KaggleApi()
+    api.authenticate()
 
-    data_dir.mkdir(exist_ok=True)
-    shutil.unpack_archive(str(zip_file_name), data_dir)
-    Path(zip_file_name).unlink()
+    # Download zip file
+    zip_path = data_dir / f"{competition_name}.zip"
+    api.competition_download_files(competition_name, path=str(data_dir), quiet=False)
+
+    # Extract zip file
+    with ZipFile(zip_path, "r") as z:
+        z.extractall(path=data_dir)
+
+    # Remove the zip file
+    zip_path.unlink()
+
+    return data_dir
+
+
+def load_kaggle_as_pandas(
+    data_path: Path,
+    read_func: Callable[[str], Any] = pd.read_csv,
+    file_extensions: Iterable[str] = (".csv",),
+) -> dict[str, Any]:
+    """
+    Load data files from a directory into pandas using `read_func`.
+    Returns a dict: {filename_stem: loaded_dataframe}
+    """
+
+    file_paths = [f for f in data_path.iterdir() if f.suffix.lower() in file_extensions]
+
+    return {f.stem: read_func(f) for f in file_paths}
