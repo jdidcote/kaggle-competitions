@@ -1,30 +1,32 @@
-from typing import Callable, Dict, Tuple, List
+from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple, List
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-def preprocessing_pipeline(
-    df: pd.DataFrame, 
-    pipeline: Dict[str, Tuple[Callable[[pd.DataFrame], pd.DataFrame], dict]],
-) -> pd.DataFrame:
-    """Applies all preprocessing steps to df
+class PipelineStep(NamedTuple):
+    name: str
+    func: Callable[[pd.DataFrame, dict[str, Any]], pd.DataFrame]
+    kwargs: dict[str, Any] = None
 
-    Args:
-        df (pd.DataFrame): input df
-        function_list (Dict[str, Tuple[Callable, dict]]): dictionary where keys are arbitrary names, and values are tuple
-        of 
 
-    Returns:
-        pd.DataFrame: preproocessed df
-    """
-    for step, (func, kwargs) in pipeline.items():
-        print(f"Running pipeline step: {step}")
-        if kwargs is None:
-            kwargs = {}
-        df = func(df, **kwargs)
-    
-    return df
+class Pipeline:
+    def __init__(self) -> None:
+        self.steps: list[PipelineStep] = []
+
+    def add(self, step: PipelineStep) -> None:
+        existing_step_names = [x.name for x in self.steps]
+        if step.name in existing_step_names:
+            raise ValueError(f"Step with name: {step.name} already exists")
+        self.steps.append(step)
+
+    def process(self, df: pd.DataFrame, verbose: Optional[str] = True) -> pd.DataFrame:
+        for pipeline_step in self.steps:
+            if verbose:
+                print(f"Running pipeline step: {pipeline_step.name}")
+            kwargs = {} if not pipeline_step.kwargs else pipeline_step.kwargs
+            df = pipeline_step.func(df, **kwargs)
+        return df
 
 
 def extract_x_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Series]:
@@ -41,7 +43,9 @@ def extract_x_y(df: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Ser
     return X, y
 
 
-def extract_and_split(df: pd.DataFrame, target_col: str, **kwargs) -> List[pd.DataFrame]:
+def extract_and_split(
+    df: pd.DataFrame, target_col: str, **kwargs
+) -> List[pd.DataFrame]:
     """
     Split into X and y, as well as
     Args:
